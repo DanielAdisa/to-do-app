@@ -30,6 +30,7 @@ const Todo = () => {
 
     const deleteTodo = (id)=>{
         setTodoList((prevTodos)=>{
+            alert("Are you sure you want to delete?")
             return prevTodos.filter((todo)=>todo.id!== id)
         })
     }
