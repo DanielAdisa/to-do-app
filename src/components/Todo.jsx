@@ -27,6 +27,12 @@ const Todo = () => {
         inputRef.current.value = "";
     }
 
+    const deleteTodo = (id)=>{
+        setTodoList((prevTodos)=>{
+            return prevTodos.filter((todo)=>todo.id!== id)
+        })
+    }
+
   return (
     <div className="flex flex-col w-11/12 max-w-md border bg-gradient-to-br from-stone-500 to-stone-800 border-stone-300 place-self-center p-7 min-h-fit rounded-xl">
         
@@ -47,7 +53,7 @@ const Todo = () => {
 
             <div>
                 {todoList.map((item, index) =>{
-                    return <TodoItems key={index} text={item.text} />
+                    return <TodoItems key={index} text={item.text} id={item.id}  isComplete={item.isComplete} deleteTodo={deleteTodo} />
                 })}
                 {/* <TodoItems text={"Well Hello There"} />
                 <TodoItems text={"Eat 4 Eggs"}/> */}
