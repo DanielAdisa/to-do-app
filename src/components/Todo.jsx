@@ -4,6 +4,7 @@ import { IoIosAddCircle } from "react-icons/io";
 import { MdOutlinePlaylistAddCheck } from "react-icons/md";
 import TodoItems from "./TodoItems";
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 const Todo = () => {
  
@@ -49,14 +50,22 @@ const Todo = () => {
     },[todoList])
 
   return (
-    <div className="flex flex-col w-11/12 max-w-md transition-all border bg-gradient-to-l from-[#6c757d] to-[#212529] border-stone-300 place-self-center p-7 min-h-fit rounded-xl">
+    <motion.div 
+    whileInView={{opacity: 1, y:0}}
+        initial={{opacity:0 , y:-50}}
+        transition={{duration:1 }}
+    className="flex flex-col w-11/12 max-w-md transition-all border bg-gradient-to-l from-[#6c757d] to-[#212529] border-stone-300 place-self-center p-7 min-h-fit rounded-xl">
         
         {/* Title */}
         
-        <div className="flex items-center gap-2 transition-all mt-7">
+        <motion.div 
+            // whileInView={{opacity: 1, x:0}}
+            // initial={{opacity:0 , x:-50}}
+            // transition={{duration:1 }}
+        className="flex items-center gap-2 transition-all mt-7">
         <LuListTodo className="text-3xl transition-all " />
         <h1 className="text-2xl font-bold tracking-tighter transition-all text-slate-300">To-Do List</h1>
-        </div>
+        </motion.div>
 
         {/* Input Field */}
         <div className="flex items-center justify-center text-sm transition-all rounded-md my-7 bg-stone-200 text-stone-300">
@@ -74,7 +83,7 @@ const Todo = () => {
                 <TodoItems text={"Eat 4 Eggs"}/> */}
             </div>
 
-    </div>
+    </motion.div>
   )
 }
 export default Todo
