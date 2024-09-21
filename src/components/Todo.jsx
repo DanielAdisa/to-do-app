@@ -16,7 +16,8 @@ const Todo = () => {
         const inputText = inputRef.current.value.trim();
 
         if (inputText === ""){
-            return null;
+            alert("Nice Try")
+            return null;     
         }
 
         const newTodo = {
@@ -24,6 +25,7 @@ const Todo = () => {
             text: inputText,
             isComplete: false,
         }
+        alert("New Goal!!!!! Lets Gooooo")
         setTodoList((prev)=>[...prev,newTodo]);
         inputRef.current.value = "";
     }
@@ -39,6 +41,7 @@ const Todo = () => {
         setTodoList((prevTodos)=>{
             return prevTodos.map((todo)=>{
                 if(todo.id === id){
+                    
                     return {...todo, isComplete:!todo.isComplete}
                 }
                 return todo;
