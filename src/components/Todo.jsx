@@ -5,6 +5,7 @@ import { BsStars, BsLightningCharge } from "react-icons/bs";
 import { FiTrendingUp, FiChevronDown } from "react-icons/fi";
 import { HiOutlineCalendarDays } from "react-icons/hi2";
 import { FaRegCalendarAlt } from "react-icons/fa";
+import { BiTime } from "react-icons/bi";
 import TodoItems from "./TodoItems";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,6 +26,8 @@ const Todo = () => {
     });
     const [showDaySelector, setShowDaySelector] = useState(false);
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+    const [editTaskId, setEditTaskId] = useState(null);
+    const [editTaskText, setEditTaskText] = useState("");
 
     const inputRef = useRef();
 
@@ -59,6 +62,87 @@ const Todo = () => {
         return false;
     };
 
+    // Check if task can be edited (same day it was created)
+    const canEditTask = (dateString) => {
+        const taskDate = parseISO(dateString);
+        const today = new Date();
+        return isSameDay(taskDate, today);
+    };
+
+    const startEditing = (id, text) => {
+        setEditTaskId(id);
+        setEditTaskText(text);
+        
+        // Use SweetAlert2 for the edit modal
+        Swal.fire({
+            title: 'Edit Task',
+            input: 'text',
+            inputValue: text,
+            inputAttributes: {
+                autocapitalize: 'off'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Save',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            background: '#1e1e2e',
+            color: '#f8fafc',
+            preConfirm: (value) => {
+                if (!value.trim()) {
+                    Swal.showValidationMessage('Task description cannot be empty');
+                    return false;
+                }
+                return value;
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                saveEdit(result.value, id); // Pass the ID directly to saveEdit
+            } else {
+                cancelEditing();
+            }
+        });
+    };
+
+    const cancelEditing = () => {
+        setEditTaskId(null);
+        setEditTaskText("");
+    };
+
+    const saveEdit = (newText, idToUpdate) => {
+        if (!newText || newText.trim() === "") {
+            return;
+        }
+
+        // Use the directly passed ID instead of the state variable
+        setTodoList(prevTodos => {
+            return prevTodos.map(todo => {
+                if (todo.id === idToUpdate) {
+                    return { 
+                        ...todo, 
+                        text: newText.trim(),
+                        lastEdited: new Date().toISOString(),
+                        isEdited: true // Flag to ensure the edited indicator shows
+                    };
+                }
+                return todo;
+            });
+        });
+
+        Swal.fire({
+            title: 'Task Updated!',
+            text: 'Your changes have been saved',
+            icon: 'success',
+            background: '#1e1e2e',
+            color: '#f8fafc',
+            iconColor: '#10b981',
+            showConfirmButton: false,
+            timer: 1500
+        });
+
+        // Make sure to clear edit state after update
+        cancelEditing();
+    };
+
     const add = () => {
         const inputText = inputRef.current.value.trim();
 
@@ -82,7 +166,8 @@ const Todo = () => {
             isComplete: false,
             createdAt: now.toISOString(),
             day: format(now, 'EEEE'),
-            isPast: false
+            isPast: false,
+            isEdited: false // Initialize as not edited
         }
         
         Swal.fire({
@@ -102,6 +187,11 @@ const Todo = () => {
     }
 
     const deleteTodo = (id) => {
+        // If currently editing this task, cancel editing
+        if (editTaskId === id) {
+            cancelEditing();
+        }
+        
         Swal.fire({
             title: 'Are you sure?',
             text: 'This task will be removed from your list',
@@ -204,6 +294,11 @@ const Todo = () => {
     const changeActiveDay = (day) => {
         setActiveDay(day);
         setShowDaySelector(false);
+        
+        // Cancel any ongoing editing when changing days
+        if (editTaskId) {
+            cancelEditing();
+        }
     };
 
     // Toggle view mode (grid/list)
@@ -340,6 +435,9 @@ const Todo = () => {
                                     time={formatDate(item.createdAt)}
                                     isPast={isPastTask(item.createdAt)}
                                     viewMode={viewMode}
+                                    canEdit={canEditTask(item.createdAt)}
+                                    onEdit={startEditing}
+                                    isEdited={item.isEdited}
                                 />
                             ))}
                         </AnimatePresence>
